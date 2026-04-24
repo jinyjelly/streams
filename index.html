@@ -3,19 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>스트림스 추첨기</title>
+    <title>스트림스 추첨기 (음악 포함)</title>
     <style>
         body {
             font-family: 'Pretendard', 'Malgun Gothic', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #fef0f7; /* 아주 연한 핑크색 배경 */
+            background-color: #fef0f7;
             margin: 0;
             padding: 20px;
             color: #4a4a4a;
+            position: relative; /* 음악 버튼 위치 지정을 위해 추가 */
         }
-        h1 { color: #f06292; margin-bottom: 5px; font-weight: 800; }
+        
+        /* 음악 제어 버튼 스타일 */
+        #music-control {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: white;
+            color: #f06292;
+            border: 2px solid #f8bbd0;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 4px 10px rgba(240, 98, 146, 0.1);
+            transition: all 0.2s;
+        }
+        #music-control:hover { background-color: #fce4ec; }
+
+        h1 { color: #f06292; margin-bottom: 5px; font-weight: 800; margin-top: 40px; }
         .draw-status {
             font-size: 22px;
             font-weight: bold;
@@ -32,10 +52,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            border-radius: 50px; /* 더 둥글게 */
+            border-radius: 50px;
             box-shadow: 0 15px 40px rgba(240, 98, 146, 0.2);
             margin: 20px 0;
-            border: 10px solid #f8bbd0; /* 연한 핑크 테두리 */
+            border: 10px solid #f8bbd0;
             transition: all 0.2s ease;
         }
         .joker { color: #ec407a !important; border-color: #ec407a !important; }
@@ -45,7 +65,7 @@
             gap: 20px;
             margin-bottom: 35px;
         }
-        button {
+        button.action-btn {
             font-size: 24px;
             padding: 18px 50px;
             border: none;
@@ -54,7 +74,7 @@
             font-weight: bold;
             transition: transform 0.1s, opacity 0.2s, background-color 0.2s;
         }
-        button:active { transform: scale(0.96); }
+        button.action-btn:active { transform: scale(0.96); }
         #draw-btn {
             background-color: #f06292;
             color: white;
@@ -109,14 +129,20 @@
 </head>
 <body>
 
+    <audio id="bgm" loop>
+        <source src="bgm.mp3" type="audio/mpeg">
+    </audio>
+
+    <button id="music-control" onclick="toggleMusic()">🎵 배경음악 켜기</button>
+
     <h1>스트림스 추첨기</h1>
     <div class="draw-status" id="draw-count">추첨 준비 완료</div>
     
     <div id="current-tile">?</div>
 
     <div class="controls">
-        <button id="draw-btn" onclick="drawTile()">타일 뽑기</button>
-        <button id="reset-btn" onclick="initGame()">초기화</button>
+        <button id="draw-btn" class="action-btn" onclick="drawTile()">타일 뽑기</button>
+        <button id="reset-btn" class="action-btn" onclick="initGame()">초기화</button>
     </div>
 
     <div class="history-container">
@@ -131,19 +157,29 @@
         let tiles = [];
         let history = [];
         const MAX_DRAWS = 20;
+        
+        // 배경음악 관련 변수
+        let isMusicPlaying = false;
+        const bgm = document.getElementById('bgm');
+
+        function toggleMusic() {
+            const musicBtn = document.getElementById('music-control');
+            if (isMusicPlaying) {
+                bgm.pause();
+                musicBtn.innerText = "🎵 배경음악 켜기";
+                isMusicPlaying = false;
+            } else {
+                bgm.play();
+                musicBtn.innerText = "🔇 배경음악 끄기";
+                isMusicPlaying = true;
+            }
+        }
 
         function initGame() {
             tiles = [];
-            // 1~10 (각 1개)
             for (let i = 1; i <= 10; i++) tiles.push(i);
-            // 11~19 (각 2개)
-            for (let i = 11; i <= 19; i++) {
-                tiles.push(i);
-                tiles.push(i);
-            }
-            // 20~30 (각 1개)
+            for (let i = 11; i <= 19; i++) { tiles.push(i); tiles.push(i); }
             for (let i = 20; i <= 30; i++) tiles.push(i);
-            // 조커 (1개)
             tiles.push('★');
             
             history = [];
